@@ -1,4 +1,5 @@
 import json
+import os
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -10,9 +11,17 @@ from torch import Tensor
 
 class ASD():
     
-    def __init__(self, model_type='aasist', config_path='./config/AASIST_ASVspoof5.conf'):
+    def __init__(self, model_type='aasist', config_path='./config/AASIST_ASVspoof5.conf', generate_score_file=False):
 
         self.model_type = model_type
+        self.gen_score_file = generate_score_file
+
+        if self.gen_score_file:
+
+            self.save_path = save_path = './score_files/'
+
+            if not os.path.exists(self.save_path):
+                os.makedirs(self.save_path)
 
         if self.model_type == 'aasist':
 
@@ -34,9 +43,7 @@ class ASD():
     
     def produce_evaluation(
             self,
-            data_dict: Dict,
-            save_path: str,
-            trial_path: str) -> None:
+            data_dict: Dict) -> None:
 
         """Perform evaluation and return a score dataframe"""
 
@@ -45,18 +52,20 @@ class ASD():
 
         fname_list = []
         score_list = []
-        for utt_id, audio_data in tqdm(data_dict):
+        for utt_id, audio_data in tqdm(data_dict.items()):
             # batch_x = batch_x.to(device)
 
             X_pad = pad(audio_data, 64600)
             x_inp = Tensor(X_pad)
+
+            x_inp = x_inp.unsqueeze(0).float()
 
             with torch.no_grad():
                 _, audio_out = model(x_inp)
                 audio_score = (audio_out[:, 1]).data.cpu().numpy().ravel()
             
             # add outputs
-            fname_list.extend(utt_id)
+            fname_list.append(utt_id)
             score_list.extend(audio_score.tolist())
 
         # using pandas method
@@ -64,9 +73,10 @@ class ASD():
 
         score_df = pd.DataFrame(data=score_dict)
 
-        # score_df.to_csv(save_path, index=False, sep="\t")
+        if self.gen_score_file:
+            score_df.to_csv(self.save_path, index=False, sep="\t")
 
-        # print("Scores saved to {}".format(save_path))
+            print("Scores saved to {}".format(self.save_path))
 
         return score_df
 

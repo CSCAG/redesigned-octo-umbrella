@@ -3,6 +3,7 @@ import soundfile as sf
 import json
 
 from preprocessing import preprocess_audio
+from asd_models import ASD
 
 
 
@@ -25,7 +26,7 @@ def upload(url, data):
 
     ############# Preprocessing block starts here #####################################
 
-    audio_chunks_dict = preprocess_audio(audio_file, save_chunks=True)
+    audio_chunks_dict = preprocess_audio(audio_file, save_chunks=False)
 
     print(audio_chunks_dict)
 
@@ -37,6 +38,10 @@ def upload(url, data):
 
 
     ############### ASD Algorithm #####################################################
+
+    asd_model = ASD()
+
+    asd_model.run(audio_chunks_dict)
 
 
 ############### main ################

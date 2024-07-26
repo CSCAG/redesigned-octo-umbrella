@@ -69,7 +69,7 @@ def preprocess_audio(audio_file, speaker_name='Barack_Obama', chunk_duration=10,
           
           chunk_np = np.array(chunk.get_array_of_samples(), dtype=np.float32)
         
-          audio_dict[file_index] = chunk_np
+          audio_dict[out_filename] = chunk_np
 
         # Update the start time and chunk index for the next chunk
 
