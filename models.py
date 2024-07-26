@@ -9,7 +9,7 @@ from torch import Tensor
 
 
 class ASD():
-
+    
     def __init__(self, model_type='aasist', config_path='./config/AASIST_ASVspoof5.conf'):
 
         self.model_type = model_type

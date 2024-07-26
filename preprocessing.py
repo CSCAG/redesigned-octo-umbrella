@@ -4,138 +4,98 @@ from importlib import import_module
 from typing import Dict, List, Union
 from tqdm import tqdm
 import os
-
-import whisper 
-from stable_whisper import modify_model
+import glob
 from pydub import AudioSegment
 
-def preprocess_audio(audio, speaker_name='Obama', chunk_len=10):
 
-    print(audio)
+def preprocess_audio(audio_file, speaker_name='Barack_Obama', chunk_duration=10, format='.wav', save_chunks = False, out_dir = './chunks/'):
+  
+    print(audio_file)
     print(speaker_name)
 
-    
+    # create output directory. If output dircetory exists, remove all contents of the output directory
+    if save_chunks:
+      if not os.path.exists(out_dir): 
+          os.makedirs(out_dir)
 
-    return 
+      elif len(os.listdir(out_dir)) != 0:             
+          files = os.listdir(out_dir)
+          print(files)
+          for f in files:
+              os.remove(os.path.join(out_dir,f))
 
+    # read audio file
+    audio = AudioSegment.from_file(audio_file, format=format)
+    audio_data = audio.set_channels(1)
 
-def sentence_splitter(input_file,i, speaker_name):
+    sr = audio_data.frame_rate
 
-    model = whisper.load_model('medium.en')
+    # totdal duration of the audio file in milliseconds
+    total_duration = audio_data.duration_seconds * 1000
 
-    # result1 = model.transcribe('/home/suryasss/Barack Obama_ Yes We Can.mp3', language='en', max_initial_timestamp=None)
-    modify_model(model)
-    result2 = model.transcribe(input_file, language='en') 
-    a = result2.segments
-    data = {
-    'Segment no': range(0, len(a)),
-    'start': [segment.start for segment in a],
-    'end': [segment.end for segment in a],
-    'text': [segment.text for segment in a]
-    }
+    print(total_duration)
 
-    # Create DataFrame
-    df = pd.DataFrame(data)
-    df["end"] = df.end + 0.25
-    df["total"] = df.end - df.start
-    df['word_count'] = df['text'].apply(word_count)
+    # Split the audio into one-minute chunks
+    base_index = 0
+    chunk_index = 1
+    start_time = 0
+    end_time = 0
+    step_size = 5000
 
-    df = clupping(df)
-    
-    fil_df = df[df.total > 4][df.word_count >= 6].reset_index(drop = True)
-    j = i+len(fil_df["end"])
-    b = np.arange(i,j)
-    fil_df["inde"] = b
-    fil_df['filename'] = fil_df['inde'].apply(lambda x: f'{speaker_name}_{x:05d}.wav')
-    
+    audio_dict = {}
 
-    for index, row in fil_df.iterrows():
-        end_time = row['end']
-        start_time = row['start']
-        duration = end_time - start_time  # Calculate duration of the chunk
-        output_file = os.path.join(out_dir, f"{config.speaker_name}_{i}.wav")  # Output file path for each chunk
+    while end_time <= total_duration:
+      
+        end_time = start_time + chunk_duration * 1000
         
-        chunk =  AudioSegment.silent(duration = 100) + AudioSegment.from_file(input_file)[start_time * 1000:(end_time * 1000)] + AudioSegment.silent(duration = 100)
+        # print(start_time)
+        # print(end_time)
 
-        chunk.export(output_file, format="wav")
-        i = i+1    
-    fil_df[["filename","text","start","end"]].to_csv(f'speaker_audios/{config.speaker_name}/meta_chunk.csv',index = False)
-    os.remove(input_file)
-    return i,fil_df[["filename","text","start","end"]]
+        # Generate the output filename
+        file_index = base_index + chunk_index
 
+        out_filename = speaker_name + f"_{file_index}"
 
-def word_count(row):
-    return len(row.split())
+        # Extract the chunk from the audio and export as a single audio file
+        chunk = audio_data[start_time:end_time]
 
+        # skip if audio is only silence otherwise save into a dictionary
+        # print(len(chunk))
+        if not (is_silent(chunk) or len(chunk) < 5000):
 
-def clupping(a):
-    grouped_segments = []
-    current_group = []
-    current_duration = 0.0
-    a['start_diff'] = a['start'].diff().shift(-1)
-    a['start_diff'] = a['start_diff'].fillna(a["total"])
-    # Iterate over the dataframe rows
-    for idx, row in a.iterrows():
-        if current_duration < config.threshold :
-
-            if current_duration + row['start_diff'] > config.threshold:
-                # Combine the text of the current group
-                combined_text = ' '.join([segment['text'] for segment in current_group])
-                
-                # Create a new row for the grouped segments
-                new_row = {
-                    'Segment no': [segment['Segment no'] for segment in current_group],
-                    'start': current_group[0]['start'],
-                    'end': current_group[-1]['end'],
-                    'text': combined_text,
-                    'total': current_duration,
-                    'word_count': sum(segment['word_count'] for segment in current_group)
-                }
-                
-                # Add the new row to the list of grouped segments
-                grouped_segments.append(new_row)
-                
-                # Reset the current group and duration
-                current_group = []
-                current_duration = 0.0
+          if save_chunks:
+              output_file = os.path.join(out_dir, out_filename + '.flac')
+              chunk.export(output_file, format="flac")
+          
+          chunk_np = np.array(chunk.get_array_of_samples(), dtype=np.float32)
         
-        else:
-                
-                # Create a new row for the grouped segments
-                new_row = {
-                    'Segment no': row["Segment no"],
-                    'start': row['start'],
-                    'end': row['end'],
-                    'text': row["text"],
-                    'total': row["total"],
-                    'word_count':  row["word_count"]
-                }
-                
-                # Add the new row to the list of grouped segments
-                grouped_segments.append(new_row)
-                
-                # Reset the current group and duration
-                current_group = []
-                current_duration = 0.0
-        
-        # Add the current row to the group
-        current_group.append(row)
-        current_duration += row['start_diff']
+          audio_dict[file_index] = chunk_np
 
-    # If there are any remaining rows in the current group, add them as a final segment
-    if current_group:
-        combined_text = ' '.join([segment['text'] for segment in current_group])
-        new_row = {
-            'Segment no': [segment['Segment no'] for segment in current_group],
-            'start': current_group[0]['start'],
-            'end': current_group[-1]['end'],
-            'text': combined_text,
-            'total': current_duration,
-            'word_count': sum(segment['word_count'] for segment in current_group)
-        }
-        grouped_segments.append(new_row)
+        # Update the start time and chunk index for the next chunk
 
-    # Convert the list of grouped segments to a new dataframe
-    grouped_df = pd.DataFrame(grouped_segments)
+        # start_time = int(end_time/2)
+        start_time = start_time + step_size
+        chunk_index += 1
 
-    return grouped_df
+    return audio_dict
+
+
+def is_silent(audio_segment):
+    """
+    Checks if an audio segment is just silence.
+
+    Args:
+      audio_segment: A pydub.AudioSegment object.
+
+    Returns:
+      True if the audio segment is just silence, False otherwise.
+    """
+
+    # Get the RMS amplitude of the audio segment.
+    rms = audio_segment.rms
+
+    # If the RMS amplitude is below a certain threshold, then the audio segment
+    # is considered to be silent.
+    silence_threshold = 0  # dB
+
+    return rms < silence_threshold
