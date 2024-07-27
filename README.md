@@ -16,5 +16,11 @@ pip3 install -r requirements.txt
 ```
 
 ## Usage
-Download the sample audio file from [here](https://drive.google.com/file/d/1rcvNLrTSPShPtwL_bfmdRBxOnoD3Nua9/view?usp=sharing).
+Download the sample audio file from [here](https://drive.google.com/file/d/1rcvNLrTSPShPtwL_bfmdRBxOnoD3Nua9/view?usp=sharing). Save this file inside the data directory. 
+
+To run the app:
+
+```
+python3 main.py
+```
 
