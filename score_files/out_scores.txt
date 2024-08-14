@@ -1,0 +1,9 @@
+filename	cm-score
+Barack_Obama_StyleTTS2	-0.027135077863931656
+Trump_Parrot_1	-0.028955984860658646
+Trump_Parrot_2	-0.028974387794733047
+Joe_Biden_ElevenLabs_1	-0.02634366974234581
+Joe_Biden_ElevenLabs_2	-0.026027541607618332
+Barack_Obama_Original	-0.02591443434357643
+Donald_Trump_Original	-0.026312675327062607
+Joe_Biden_Original	-0.02665204182267189

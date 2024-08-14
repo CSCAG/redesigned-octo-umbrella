@@ -18,7 +18,7 @@ def upload(url, data):
     # we can either save the audio file locally and then pass the audio filename and save path to the preprocessing block
     # OR, we can read the audio file directly and pass the audio data to the preprocesing block
     data_dir = './data'
-    filename = 'A Promised Land - 004.wav'
+    filename = 'Barack_Obama.wav'
 
     audio_file = os.path.join(data_dir, filename)
 
@@ -26,9 +26,10 @@ def upload(url, data):
 
     ############# Preprocessing block starts here #####################################
 
-    audio_chunks_dict = preprocess_audio(audio_file, save_chunks=False)
+    # audio_chunks_dict = preprocess_audio(audio_file, save_chunks=True)
+    audio_chunks_dict = {}
 
-    print(audio_chunks_dict)
+    # print(audio_chunks_dict)
 
     # format for audio_chunks_dict = {chunk_1: audio_data, chunk_2: audio_data, ...}
 
@@ -39,9 +40,11 @@ def upload(url, data):
 
     ############### ASD Algorithm #####################################################
 
-    asd_model = ASD()
+    asd_model = ASD(model_type='aasist', generate_score_file=True)
 
-    asd_model.run(audio_chunks_dict)
+    score_df = asd_model.run(audio_chunks_dict, use_saved_chunks=True)
+
+    print(score_df)
 
 
 ############### main ################
