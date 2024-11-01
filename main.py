@@ -20,14 +20,20 @@ def upload(url, data):
     data_dir = './data'
     filename = 'Barack_Obama.wav'
 
+    speaker_name = 'Barack_Obama'
+
     audio_file = os.path.join(data_dir, filename)
 
     # audio_data = sf.read(audio_file)
 
     ############# Preprocessing block starts here #####################################
 
-    # audio_chunks_dict = preprocess_audio(audio_file, save_chunks=True)
-    audio_chunks_dict = {}
+    chunk_dir = 'chunks_Barack_Obama_2'
+    audio_chunks_dict = preprocess_audio(audio_file, speaker_name=speaker_name, save_chunks=True, out_dir=chunk_dir, format='.wav')
+
+    print(audio_chunks_dict)
+
+    # audio_chunks_dict = {}
 
     # print(audio_chunks_dict)
 
@@ -40,11 +46,16 @@ def upload(url, data):
 
     ############### ASD Algorithm #####################################################
 
-    asd_model = ASD(model_type='aasist', generate_score_file=True)
+    asd_model_aasist = ASD(model_type='aasist', generate_score_file=True)
 
-    score_df = asd_model.run(audio_chunks_dict, use_saved_chunks=True)
+    asd_model_rawnet = ASD(model_type='rawnet', generate_score_file=True)
 
-    print(score_df)
+    score_df_aasist = asd_model_aasist.run(audio_chunks_dict, use_saved_chunks=True, chunk_dir=chunk_dir, speaker_name=speaker_name)
+
+    score_df_rawnet = asd_model_rawnet.run(audio_chunks_dict, use_saved_chunks=True, chunk_dir=chunk_dir, speaker_name=speaker_name)
+
+    print(score_df_aasist)
+    print(score_df_rawnet)
 
 
 ############### main ################

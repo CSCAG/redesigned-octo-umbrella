@@ -1,0 +1,7 @@
+filename	cm-score
+Iranian_state_media_audio_1	-10.220160484313965
+Iranian_state_media_audio_2	-11.006309509277344
+Iranian_state_media_audio_3	-10.310750007629395
+Iranian_state_media_audio_4	-9.919564247131348
+Iranian_state_media_audio_5	-10.481925964355469
+Iranian_state_media_audio_6	-10.270695686340332

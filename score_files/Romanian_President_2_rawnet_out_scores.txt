@@ -1,0 +1,16 @@
+filename	cm-score
+Romanian_President_2_1	-11.170699119567871
+Romanian_President_2_2	-11.200315475463867
+Romanian_President_2_3	-11.337543487548828
+Romanian_President_2_4	-11.452704429626465
+Romanian_President_2_5	-10.025501251220703
+Romanian_President_2_6	-10.997801780700684
+Romanian_President_2_7	-11.349751472473145
+Romanian_President_2_8	-10.705697059631348
+Romanian_President_2_9	-11.13112735748291
+Romanian_President_2_10	-11.337196350097656
+Romanian_President_2_11	-10.8978853225708
+Romanian_President_2_12	-11.521099090576172
+Romanian_President_2_13	-11.07883358001709
+Romanian_President_2_14	-11.277787208557129
+Romanian_President_2_15	-10.56993579864502

@@ -11,7 +11,7 @@ import soundfile as sf
 import librosa
 import yaml
 
-from models.model import RawNet
+from models.RawNet import RawNet
 
 
 class ASD():
@@ -65,11 +65,11 @@ class ASD():
                 print('Model loaded : {}'.format(model_path))
 
     
-    def run(self, audio_data_dict: Dict, use_saved_chunks = False):
+    def run(self, audio_data_dict: Dict, use_saved_chunks = False, chunk_dir='./chunks', speaker_name='Barack_Obama'):
 
         if use_saved_chunks:
 
-            chunk_dir = './chunks'
+            chunk_dir = chunk_dir
             # chunk_dir = '/data/Famous_Figures/AES_Data/aes_data'
 
             chunk_files = os.listdir(chunk_dir)
@@ -86,17 +86,18 @@ class ASD():
 
                 audio_data_dict[cf.split('.')[0]] = audio_data
 
-            score_df = self.produce_evaluation(data_dict=audio_data_dict)
+            score_df = self.produce_evaluation(data_dict=audio_data_dict, speaker_name=speaker_name)
 
         else:
-            score_df = self.produce_evaluation(data_dict=audio_data_dict)
+            score_df = self.produce_evaluation(data_dict=audio_data_dict, speaker_name=speaker_name)
 
         return score_df
 
     
     def produce_evaluation(
             self,
-            data_dict: Dict) -> None:
+            data_dict: Dict,
+            speaker_name='Barack_Obama') -> None:
 
         """Perform evaluation and return a score dataframe"""
 
@@ -132,9 +133,11 @@ class ASD():
         score_df = pd.DataFrame(data=score_dict)
 
         if self.gen_score_file:
-            score_df.to_csv(os.path.join(self.save_path, self.model_type + '_out_scores.txt'), index=False, sep="\t")
 
-            print("Scores saved to {}".format(self.save_path))
+            score_file = os.path.join(self.save_path, speaker_name + '_' + self.model_type + '_out_scores.txt')
+            score_df.to_csv(score_file, index=False, sep="\t")
+
+            print("Scores saved to {}".format(score_file))
 
         return score_df
 
