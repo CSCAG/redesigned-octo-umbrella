@@ -3,7 +3,8 @@ import soundfile as sf
 import json
 
 from preprocessing import preprocess_audio
-from asd_models import ASD
+# from asd_models import ASD
+from asd_models_test import ASD
 
 
 
@@ -18,9 +19,9 @@ def upload(url, data):
     # we can either save the audio file locally and then pass the audio filename and save path to the preprocessing block
     # OR, we can read the audio file directly and pass the audio data to the preprocesing block
     data_dir = './data'
-    filename = 'Barack_Obama.wav'
+    filename = 'Donald_Trump.wav'
 
-    speaker_name = 'Barack_Obama'
+    speaker_name = 'Donald_Trump'
 
     audio_file = os.path.join(data_dir, filename)
 
@@ -28,7 +29,7 @@ def upload(url, data):
 
     ############# Preprocessing block starts here #####################################
 
-    chunk_dir = 'chunks_Barack_Obama_2'
+    chunk_dir = 'chunks_Donald_Trump_test'
     audio_chunks_dict = preprocess_audio(audio_file, speaker_name=speaker_name, save_chunks=True, out_dir=chunk_dir, format='.wav')
 
     print(audio_chunks_dict)
@@ -48,14 +49,15 @@ def upload(url, data):
 
     asd_model_aasist = ASD(model_type='aasist', generate_score_file=True)
 
-    asd_model_rawnet = ASD(model_type='rawnet', generate_score_file=True)
+    # asd_model_rawnet = ASD(model_type='rawnet', generate_score_file=True)
 
-    score_df_aasist = asd_model_aasist.run(audio_chunks_dict, use_saved_chunks=True, chunk_dir=chunk_dir, speaker_name=speaker_name)
+    # score_df_aasist = asd_model_aasist.run(audio_chunks_dict, use_saved_chunks=True, chunk_dir=chunk_dir, speaker_name=speaker_name)
+    score_df_aasist = asd_model_aasist.run(audio_chunks_dict)
 
-    score_df_rawnet = asd_model_rawnet.run(audio_chunks_dict, use_saved_chunks=True, chunk_dir=chunk_dir, speaker_name=speaker_name)
+    # score_df_rawnet = asd_model_rawnet.run(audio_chunks_dict, use_saved_chunks=True, chunk_dir=chunk_dir, speaker_name=speaker_name)
 
     print(score_df_aasist)
-    print(score_df_rawnet)
+    # print(score_df_rawnet)
 
 
 ############### main ################

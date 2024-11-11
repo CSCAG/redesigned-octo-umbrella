@@ -58,7 +58,7 @@ class ASD():
                 self.model =(model).to(self.device)
                 print("no. model params:{}".format(nb_params))
 
-            model_path = './models/weights/RawNet2/RawNet2_best_model_laundered_train.pth'
+            model_path = './models/weights/RawNet2/pre_trained_DF_RawNet2.pth'
 
             if model_path:
                 model.load_state_dict(torch.load(model_path,map_location=self.device))
