@@ -86,6 +86,7 @@ class ASD():
 
                 audio_data_dict[cf.split('.')[0]] = audio_data
 
+            print(audio_data_dict)
             score_df = self.produce_evaluation(data_dict=audio_data_dict, speaker_name=speaker_name)
 
         else:

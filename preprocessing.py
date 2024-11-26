@@ -6,9 +6,35 @@ from tqdm import tqdm
 import os
 import glob
 from pydub import AudioSegment
+import librosa
 
 
-def preprocess_audio(audio_file, speaker_name='Barack_Obama', chunk_duration=10, format='.wav', save_chunks = False, out_dir = './chunks/'):
+def pydub_to_np(audio: AudioSegment, target_sr=16000) -> tuple[np.ndarray, int]:
+    """
+    Converts pydub audio segment into np.float32 of shape [duration_in_seconds*sample_rate, channels],
+    where each value is in range [-1.0, 1.0]. 
+    Returns tuple (audio_np_array, sample_rate).
+    """
+    # audio = audio.set_frame_rate(req_frame_rate)
+    # return np.array(audio.get_array_of_samples(), dtype=np.float32)/ (
+    #         1 << (8 * audio.sample_width - 1)), audio.frame_rate
+
+    raw_samples = np.array(audio.get_array_of_samples(), dtype=np.float32)
+
+    max_val = np.iinfo(audio.array_type).max 
+    normalized_samples = raw_samples / max_val  
+
+    original_sr = audio.frame_rate
+
+    # Resample to the target sample rate using librosa
+    if original_sr != target_sr:
+        chunk_np_a = librosa.resample(normalized_samples, orig_sr=original_sr, target_sr=target_sr)
+    else:
+        chunk_np_a = normalized_samples
+
+    return chunk_np_a
+
+def preprocess_audio(audio_file, speaker_name='Barack_Obama', chunk_duration=10, format='.wav', save_chunks = False, out_dir = './chunks/', out_frame_rate=16000):
   
     print(audio_file)
     print(speaker_name)
@@ -27,8 +53,11 @@ def preprocess_audio(audio_file, speaker_name='Barack_Obama', chunk_duration=10,
     # read audio file
     audio = AudioSegment.from_file(audio_file, format=format)
     audio_data = audio.set_channels(1)
+    # audio_data = audio.set_frame_rate(out_frame_rate)
 
     sr = audio_data.frame_rate
+
+    print(sr)
 
     # totdal duration of the audio file in milliseconds
     total_duration = audio_data.duration_seconds * 1000
@@ -67,7 +96,8 @@ def preprocess_audio(audio_file, speaker_name='Barack_Obama', chunk_duration=10,
               output_file = os.path.join(out_dir, out_filename + '.flac')
               chunk.export(output_file, format="flac")
           
-          chunk_np = np.array(chunk.get_array_of_samples(), dtype=np.float32)
+          # chunk_np = np.array(chunk.get_array_of_samples(), dtype=np.float32)
+          chunk_np = pydub_to_np(chunk)
         
           audio_dict[out_filename] = chunk_np
 
