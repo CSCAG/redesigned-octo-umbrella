@@ -44,7 +44,7 @@ def upload(url, data):
 
     ############### ASD Algorithm #####################################################
 
-    asd_model_aasist = ASD(model_type='aasist', generate_score_file=True)
+    asd_model_aasist = ASD(model_type='rawnet', generate_score_file=True)
 
     # asd_model_rawnet = ASD(model_type='rawnet', generate_score_file=True)
 
